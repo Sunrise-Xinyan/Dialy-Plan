@@ -31,7 +31,7 @@ class _TodayScreenState extends State<TodayScreen> {
           builder: (context, provider, child) {
             final stats = provider.todayStats;
             final today = DateTime.now();
-            final todayDisplay = DateFormat('M月d日 EEEE', 'zh_CN').format(today);
+            final todayDisplay = DateFormat('M月d日 E').format(today);
 
             final totalMinutes = (stats?.totalExerciseDuration ?? 0) + 
                                 (stats?.totalStudyDuration ?? 0);
