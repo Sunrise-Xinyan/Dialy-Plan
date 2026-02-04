@@ -1,0 +1,66 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v3
+    
+    - name: ☕ 设置 Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: 🎯 设置 Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+    
+    - name: 📦 获取依赖
+      run: flutter pub get
+    
+    - name: 🔨 构建 APK
+      run: flutter build apk --release
+    
+    - name: 📤 上传 APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release
+        path: build/app/outputs/flutter-apk/app-release.apk
+    
+    - name: 🎉 创建 Release
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Release v1.0.${{ github.run_number }}
+        files: build/app/outputs/flutter-apk/app-release.apk
+        body: |
+          ## 📱 日常计划应用 APK
+          
+          ### 下载安装
+          1. 点击下方 `app-release.apk` 下载
+          2. 传输到手机
+          3. 点击安装
+          
+          ### 功能特性
+          - ✅ 今日计划统计
+          - ✅ 运动记录管理
+          - ✅ 学习记录管理
+          - ✅ 数据云端同步
+          
+          ### 系统要求
+          - Android 5.0 或更高版本
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
